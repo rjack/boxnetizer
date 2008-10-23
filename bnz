@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+
+#############################################################################
+# Constants
+#############################################################################
+
+# ultra settings from 7z(1)
+SEVENZIP_OPT="-t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on"
+REQUIRED_TOOLS="7z split"
+
+
+#############################################################################
+# Variables
+#############################################################################
+
+cmd="7z a $SEVENZIP_OPT"
+
+
+#############################################################################
+# Functions
+#############################################################################
+
+function die
+{
+	echo -e "$@"
+	exit 1
+}
+
+
+function usage
+{
+	die 	"usage:\n   $0 DIR\nor $0 FILE"
+}
+
+
+function die_if_missing_tools
+{
+	missing_tools=
+
+	for i in $REQUIRED_TOOLS ; do
+		which $i > /dev/null || missing_tools="$i $missing_tools"
+	done
+
+	[[ -n $missing_tools ]] && \
+		die "These tools are missing: $missing_tools"
+}
+
+
+#############################################################################
+# Script
+#############################################################################
+
+die_if_missing_tools
+
+[[ -n $1 ]] || usage
+
+if [[ -f $1 || -d $1 ]] ; then
+	cmd="$cmd ${1}.7z $1"
+else
+	die "$1 is not a dir nor a file"
+fi
+
+echo $cmd
