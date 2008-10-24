@@ -8,7 +8,7 @@
 # ultra settings from 7z(1)
 SEVENZIP_OPT="-t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on"
 REQUIRED_TOOLS="stat readlink 7z split"
-MAX_UPLOAD_SIZE="9216"
+MAX_UPLOAD_SIZE="9437184"
 
 
 #############################################################################
@@ -18,7 +18,7 @@ MAX_UPLOAD_SIZE="9216"
 arch_cmd="7z a $SEVENZIP_OPT"
 src_path=
 output_dir="/shared/tmp"
-archive=
+archive_path=
 
 
 #############################################################################
@@ -65,10 +65,16 @@ die_if_missing_tools
 src_path=$(readlink -f $1)
 
 if [[ -f $src_path || -d $src_path ]] ; then
-	archive="${output_dir}/$(basename $src_path).7z"
-	arch_cmd="$arch_cmd $archive $src_path"
+	archive_path="${output_dir}/$(basename $src_path).7z"
+	arch_cmd="$arch_cmd $archive_path $src_path"
 else
 	die "$src_path is not a dir nor a file"
 fi
 
 eval $arch_cmd
+
+if [[ $(stat -c %s $archive_path) > $MAX_UPLOAD_SIZE ]] ; then
+	echo "splitting ${archive_path} ..."
+	split -b $MAX_UPLOAD_SIZE $archive_path ${archive_path}-
+	echo "done"
+fi
