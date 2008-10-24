@@ -59,6 +59,9 @@ die_if_missing_tools
 
 [[ -n $1 ]] || usage
 
+
+# Create 7z archive
+
 src_path=$(readlink -f $1)
 
 if [[ -f $src_path || -d $src_path ]] ; then
